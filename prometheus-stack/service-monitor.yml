@@ -1,0 +1,98 @@
+---
+# Need this to tells prometheus to scape metrics from cert-manager
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: oussama-cert-manager-servicemonitor
+  namespace: monitoring
+  labels:
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cert-manager
+  namespaceSelector:
+    matchNames:
+    - cert-manager
+  endpoints:
+  - port: tcp-prometheus-servicemonitor
+    path: /metrics
+    interval: 30s
+---
+# Need this to tells prometheus to scape metrics from postgres database
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  namespace: production
+  name: oussama-test-postgres-exporter
+  labels:
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: postgres
+  namespaceSelector:
+    matchNames:
+      - production
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 15s
+---
+# Need this to tells prometheus to scape metrics from nestjs application
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: oussama-nestjs-servicemonitor
+  namespace: production
+  labels:
+    release: prometheus  # MUST match your Prometheus release label
+spec:
+  selector:
+    matchLabels:
+      app: nodejs-app   # Matches the label on your Service
+  namespaceSelector:
+    matchNames:
+      - production
+  endpoints:
+    - port: http     # Must match the name of the port exposed (see next section)
+      path: /metrics
+      interval: 15s
+--- 
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: oussama-nestjs-canary-servicemonitor
+  namespace: production
+  labels:
+    release: prometheus  # MUST match your Prometheus release label
+spec:
+  selector:
+    matchLabels:
+      app: nestjs-app-canary   # Matches the label on your Service
+  namespaceSelector:
+    matchNames:
+      - production
+  endpoints:
+    - port: http     # Must match the name of the port exposed (see next section)
+      path: /metrics
+      interval: 15s
+--- 
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: oussama-nestjs-primary-servicemonitor
+  namespace: production
+  labels:
+    release: prometheus  # MUST match your Prometheus release label
+spec:
+  selector:
+    matchLabels:
+      app: nestjs-app-primary   # Matches the label on your Service
+  namespaceSelector:
+    matchNames:
+      - production
+  endpoints:
+    - port: http     # Must match the name of the port exposed (see next section)
+      path: /metrics
+      interval: 15s
